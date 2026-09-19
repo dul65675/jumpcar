@@ -1,37 +1,31 @@
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local uis = game:GetService("UserInputService")
+local rs = game:GetService("RunService")
+local isholdingt = false
+local jumpImpulse = 500  -- La force du saut
 
-local player = Players.LocalPlayer
-local jumpForce = 120
+uis.InputBegan:Connect(function(a)
+    if a.KeyCode == Enum.KeyCode.T then
+        isholdingt = true
+    end
+end)
 
-local function getVehicleSeat()
-	local character = player.Character
-	if not character then return nil end
+uis.InputEnded:Connect(function(a)
+    if a.KeyCode == Enum.KeyCode.T then
+        isholdingt = false
+    end
+end)
 
-	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if not humanoid then return nil end
+rs.Heartbeat:Connect(function(deltatime)
+    local player = game:GetService("Players").LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local seat = humanoid.SeatPart
 
-	local seat = humanoid.SeatPart
-	if seat and seat:IsA("VehicleSeat") then
-		return seat
-	end
+    if seat and isholdingt then
+        -- Appliquer une impulsion verticale (saut) à la partie du siège
+        local currentVelocity = seat.AssemblyLinearVelocity
 
-	return nil
-end
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-
-	if input.KeyCode == Enum.KeyCode.T then
-		local seat = getVehicleSeat()
-		if not seat then return end
-
-		local vehicle = seat:FindFirstAncestorOfClass("Model")
-		if not vehicle then return end
-
-		local root = vehicle.PrimaryPart or seat
-
-		-- Fait sauter le véhicule
-		root:ApplyImpulse(Vector3.new(0, root.AssemblyMass * jumpForce, 0))
-	end
+        -- Ajouter une impulsion uniquement sur l'axe Y pour simuler un saut
+        seat.AssemblyLinearVelocity = Vector3.new(currentVelocity.X, jumpImpulse, currentVelocity.Z)
+    end
 end)
