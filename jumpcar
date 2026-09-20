@@ -1,7 +1,7 @@
 local uis = game:GetService("UserInputService")
 local rs = game:GetService("RunService")
 local isholdingt = false
-local jumpImpulse = 500  -- La force du saut
+local jumpImpulse = 100  -- La force du saut
 
 uis.InputBegan:Connect(function(a)
     if a.KeyCode == Enum.KeyCode.T then
